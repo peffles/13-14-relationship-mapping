@@ -2,15 +2,22 @@
 
 import faker from 'faker';
 import superagent from 'superagent';
+import Street from '../model/street-model';
 import { startServer, stopServer } from '../lib/server';
-import { pCreateStreetMock, pRemoveStreetMock } from './lib/street-mock';
 
 const API_URL = `http://localhost:${process.env.PORT}/api/streets`;
+
+const pCreateMockStreet = () => {
+  return new Street({
+    name: faker.lorem.words(2),
+    streetLength: faker.random.number(),
+  }).save();
+};
 
 describe('api/v1/streets', () => {
   beforeAll(startServer);
   afterAll(stopServer);
-  afterEach(pRemoveStreetMock);
+  afterEach(() => Street.remove({}));
 
   describe('POST api/streets', () => {
     test('respond with 200 status for a successful POST', () => {
@@ -28,7 +35,7 @@ describe('api/v1/streets', () => {
         });
     });
     test('409 due to duplicate name', () => {
-      return pCreateStreetMock()
+      return pCreateMockStreet()
         .then((street) => {
           const mockStreet = {
             name: street.name,
@@ -63,25 +70,25 @@ describe('api/v1/streets', () => {
   describe('PUT api/streets', () => {
     test('respond with 200 status from a successful PUT', () => {
       let streetToUpdate = null;
-      return pCreateStreetMock()
+      return pCreateMockStreet()
         .then((street) => {
           streetToUpdate = street;
           return superagent.put(`${API_URL}/${street._id}`)
-            .send({ streetLength: 10000 });
+            .send({ streetLength: 10 });
         })
         .then((response) => {
           expect(response.status).toEqual(200);
           expect(response.body.name).toEqual(streetToUpdate.name);
-          expect(response.body.streetLength).toEqual(10000);
+          expect(response.body.streetLength).toEqual(10);
           expect(response.body._id).toEqual(streetToUpdate._id.toString());
         });
     });
     test('409 due to duplicate name', () => {
       let firstMock = null;
-      return pCreateStreetMock()
+      return pCreateMockStreet()
         .then((street) => {
           firstMock = street;
-          return pCreateStreetMock();
+          return pCreateMockStreet();
         })
         .then((secondStreet) => {
           return superagent.put(`${API_URL}/${secondStreet._id}`)
@@ -93,7 +100,7 @@ describe('api/v1/streets', () => {
         });
     });
     test('should respond with 404 if the id is not found', () => {
-      return superagent.put(`${API_URL}/ThisIsAnInvalidId`)
+      return superagent.put(`${API_URL}/thiswontwork`)
         .then(Promise.reject)
         .catch((response) => {
           expect(response.status).toEqual(404);
@@ -112,7 +119,7 @@ describe('api/v1/streets', () => {
   describe('GET /api/streets', () => {
     test('should respond with 200 if there are no errors', () => {
       let streetToTest = null;
-      return pCreateStreetMock()
+      return pCreateMockStreet()
         .then((street) => {
           streetToTest = street;
           return superagent.get(`${API_URL}/${street.id}`);
@@ -121,11 +128,11 @@ describe('api/v1/streets', () => {
           expect(response.status).toEqual(200);
           expect(response.body.name).toEqual(streetToTest.name);
           expect(response.body.location).toEqual(streetToTest.location);
-          expect(response.body.brands).toEqual(streetToTest.brands);
+          expect(response.body.cuisine).toEqual(streetToTest.cuisine);
         });
     });
-    test('should respond with 404 if no street is found', () => {
-      return superagent.get(`${API_URL}/ThisIsAnInvalidId`)
+    test('should respond with 404 if there is no street to be found', () => {
+      return superagent.get(`${API_URL}/thiswontwork`)
         .then(Promise.reject)
         .catch((response) => {
           expect(response.status).toEqual(404);
@@ -135,7 +142,7 @@ describe('api/v1/streets', () => {
 
   describe('DELETE /api/streets', () => {
     test('should delete a street and return a 204 status code', () => {
-      return pCreateStreetMock()
+      return pCreateMockStreet()
         .then((street) => {
           return superagent.delete(`${API_URL}/${street.id}`);
         })
@@ -144,7 +151,7 @@ describe('api/v1/streets', () => {
         });
     });
     test('should respond with 404 if there is no street to be deleted', () => {
-      return superagent.get(`${API_URL}/ThisIsAnInvalidId`)
+      return superagent.get(`${API_URL}/thiswontwork`)
         .then(Promise.reject)
         .catch((response) => {
           expect(response.status).toEqual(404);

@@ -4,7 +4,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import logger from './logger';
 import streetRoutes from '../route/street-router';
-import storeRoutes from '../route/store-router';
 import loggerMiddleware from './logger-middleware';
 import errorMiddleware from './error-middleware';
 
@@ -14,7 +13,6 @@ let server = null;
 app.use(loggerMiddleware);
 
 app.use(streetRoutes);
-app.use(storeRoutes);
 
 app.all('*', (request, response) => {
   logger.log(logger.INFO, 'Returning a 404 from the catch/all default route');
