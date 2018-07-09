@@ -76,7 +76,7 @@ describe('/api/stores', () => {
         });
     });
     test('should respond with 404 if the id is invalid', () => {
-      return superagent.get(`${API_URL}/ThisIsAnInvalidId`)
+      return superagent.get(`${API_URL}/thiswontwork`)
         .then(Promise.reject)
         .catch((response) => {
           expect(response.status).toEqual(404);
@@ -132,7 +132,7 @@ describe('/api/stores', () => {
         });
     });
     test('should respond with 404 if no store is found', () => {
-      return superagent.get(`${API_URL}/ThisIsAnInvalidId`)
+      return superagent.get(`${API_URL}/thiswontwork`)
         .then(Promise.reject)
         .catch((response) => {
           expect(response.status).toEqual(404);
@@ -151,7 +151,7 @@ describe('/api/stores', () => {
         });
     });
     test('should respond with 404 if there is no street to be deleted', () => {
-      return superagent.get(`${API_URL}/ThisIsAnInvalidId`)
+      return superagent.get(`${API_URL}/thiswontwork`)
         .then(Promise.reject)
         .catch((response) => {
           expect(response.status).toEqual(404);
